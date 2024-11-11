@@ -1,7 +1,9 @@
+import 'package:date_ai/utils/fake_data.dart';
 import 'package:date_ai/utils/screen_size.dart';
 import 'package:date_ai/utils/theme_helper.dart';
 import 'package:date_ai/widgets/buttons/primary_button.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,6 +13,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _latestRes = FakeData.scanned;
+
   @override
   Widget build(BuildContext context) {
     final theme = ThemeHelper(context);
@@ -89,33 +93,45 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: screenSize.height * 0.01,),
               const Divider(height: 2,),
               SizedBox(height: screenSize.height * 0.01,),
-              _topAnomaliesItem(3,16, 'Black Scorc', '20%%', context),
+              _topAnomaliesItem(3,16, 'Black Scorc', '20%', context),
             ],
           ),
         ),
         SizedBox(height: screenSize.height * 0.03,),
-        Expanded(
-          child: Container(
-            padding: EdgeInsets.symmetric(
-                horizontal: screenSize.width * 0.05,
-                vertical: screenSize.height * 0.02
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Latest Scans',
+              style: theme.textStyle.titleLarge!.copyWith(
+                fontWeight: FontWeight.w500,
+                fontSize: 19,
+              ),
             ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Latest results',
+            TextButton(
+                onPressed: null,
+                child: Text(
+                  'see all',
                   style: theme.textStyle.titleMedium!.copyWith(
-                    fontWeight: FontWeight.w500,
+                      color: Colors.black45
                   ),
-                ),
-                SizedBox(height: screenSize.height * 0.03,)
-              ],
+                )
             ),
+          ],
+        ),
+        SizedBox(
+          width: screenSize.width * 0.5,
+          height: screenSize.height * 0.27,
+          child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _latestRes.length,
+              itemBuilder: (context, index) {
+                return _latestResultItem(
+                _latestRes[index]['image']!,
+                _latestRes[index]['date']!,
+                _latestRes[index]['status']!
+                );
+              }
           ),
         ),
       ],
@@ -185,7 +201,77 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _latestResultItem(String image, String date,) {
-    return Container();
+
+  Widget _latestResultItem(String imageURL, String date, String status) {
+    final screenSize = ScreenSize(context);
+    final theme = ThemeHelper(context);
+
+    return Container(
+      width: screenSize.width * 0.8,
+      margin: EdgeInsets.symmetric(
+          horizontal: screenSize.width * 0.025
+      ),
+
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(24),
+                topRight: Radius.circular(24)
+            ),
+            child: Image.network(
+              imageURL,
+              fit: BoxFit.fill,
+              height: screenSize.height * 0.18,
+              width: screenSize.width ,
+              loadingBuilder: (BuildContext context, Widget child,
+                  ImageChunkEvent? loading) {
+                if (loading != null) {
+                  return Shimmer.fromColors(
+                    baseColor: theme.colorScheme.inversePrimary.withOpacity(0.1),
+                    highlightColor: theme.colorScheme.inversePrimary!.withOpacity(0.03),
+                    child: Container(
+                      height: screenSize.height * 0.18,
+                      width: screenSize.width,
+                      color: Colors.white,
+                    ),
+                  );
+                }
+                return child;
+              },
+            ),
+          ),
+          SizedBox(height: screenSize.height * 0.01),
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: screenSize.width * 0.05,
+            ),
+            child: Text(
+              'Scanned on $date',
+              style: theme.textStyle.titleMedium!.copyWith(
+                  fontWeight: FontWeight.w500
+              ),
+            ),
+          ),
+          SizedBox(height: screenSize.height * 0.01,),
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: screenSize.width * 0.05,
+            ),
+            child: Text(
+              'Anomaly: $status',
+              style: theme.textStyle.bodyMedium!.copyWith(
+                  color: Colors.black54
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

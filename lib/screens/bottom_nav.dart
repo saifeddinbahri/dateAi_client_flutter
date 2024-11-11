@@ -41,7 +41,7 @@ class _BottomNavState extends State<BottomNav> {
     final theme = ThemeHelper(context);
 
     return Scaffold(
-        backgroundColor: const Color(0xFFF8F5F2),
+        backgroundColor: const Color(0xFFf8f8f6),  //const Color(0xFFF8F5F2),
         bottomNavigationBar: Padding(
           padding: EdgeInsets.only(
             right: screenPadding.horizontal,
