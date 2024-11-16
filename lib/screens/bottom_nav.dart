@@ -1,3 +1,4 @@
+import 'package:date_ai/screens/camera_screen/camera_screen.dart';
 import 'package:date_ai/screens/home_screen/home_screen.dart';
 import 'package:date_ai/utils/screen_padding.dart';
 import 'package:date_ai/utils/screen_size.dart';
@@ -13,7 +14,7 @@ class BottomNav extends StatefulWidget {
 }
 
 class _BottomNavState extends State<BottomNav> {
-  List<Widget> _pages = [] ;
+  List<dynamic> _pages = [] ;
   int _activeIndex = 0;
 
 
@@ -28,8 +29,9 @@ class _BottomNavState extends State<BottomNav> {
     // TODO: implement initState
     super.initState();
     _pages = [
-      const HomeScreen(),
-      const HistoryScreen(),
+      { 'screen': const HomeScreen(), 'padding': true},
+      { 'screen': const CameraScreen(), 'padding': false},
+      { 'screen': const HistoryScreen(), 'padding': true},
     ];
   }
 
@@ -42,45 +44,52 @@ class _BottomNavState extends State<BottomNav> {
 
     return Scaffold(
         backgroundColor: const Color(0xFFf8f8f6),  //const Color(0xFFF8F5F2),
-        bottomNavigationBar: Padding(
-          padding: EdgeInsets.only(
-            right: screenPadding.horizontal,
-            left: screenPadding.horizontal,
-            bottom: screenSize.height * 0.01
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary,
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary,
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton(onPressed: () => changeActivePage(0),
-                    icon: Icon(
-                      Icons.home,
-                      color:  _activeIndex == 0 ? Colors.white : Colors.white70 ,
-                    ),
-                ),
-                IconButton(onPressed: () => changeActivePage(1),
-                    icon: Icon(Icons.history,
-                      color: _activeIndex == 1 ? Colors.white : Colors.white70,)
-                ),
-              ],
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              IconButton(onPressed: () => changeActivePage(0),
+                  icon: Icon(
+                    Icons.home,
+                    color:  _activeIndex == 0 ? Colors.white : Colors.white70 ,
+                  ),
+              ),
+              IconButton(onPressed: () => changeActivePage(1),
+                  icon: Icon(Icons.camera_alt,
+                    color: _activeIndex == 1 ? Colors.white : Colors.white70,)
+              ),
+              IconButton(onPressed: () => changeActivePage(2),
+                  icon: Icon(Icons.history,
+                    color: _activeIndex == 2 ? Colors.white : Colors.white70,)
+              ),
+            ],
           ),
         ),
-        body: Padding(
-            padding: EdgeInsets.only(
-              right: screenPadding.horizontal,
-              left: screenPadding.horizontal,
-              top: screenSize.height * 0.05
-            ),
-            child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                child: _pages[_activeIndex],
-            ),
-        )
+        body: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: _screenPadding(
+                _pages[_activeIndex]['screen'],
+                _pages[_activeIndex]['padding']),
+        ),
     );
+  }
+
+  Widget _screenPadding(Widget screen, bool setPadding) {
+    final screenPadding = ScreenPadding(context);
+    final screenSize = ScreenSize(context);
+
+    if (setPadding) {
+      return Padding(
+        padding: EdgeInsets.only(
+            right: screenPadding.horizontal,
+            left: screenPadding.horizontal,
+            top: screenSize.height * 0.05),
+        child: screen,
+      );
+    }
+    return screen;
   }
 }

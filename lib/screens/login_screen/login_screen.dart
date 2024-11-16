@@ -1,3 +1,4 @@
+import 'package:date_ai/screens/bottom_nav.dart';
 import 'package:date_ai/utils/screen_padding.dart';
 import 'package:date_ai/utils/screen_size.dart';
 import 'package:date_ai/widgets/inputfield/cusotm_textfield.dart';
@@ -84,7 +85,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: screenSize.height * 0.02),
                 PrimaryButton(
-                  onPressed: (){},
+                  onPressed: (){
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const BottomNav(),
+                        ),
+                        ModalRoute.withName("/Home")
+                    );
+                  },
                   context: context,
                   child: Text(
                     'Log in',
