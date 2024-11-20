@@ -11,11 +11,11 @@ class PrimaryButton extends TextButton {
     required BuildContext context,
   }): super(
     style: TextButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30)
-        ),
-        backgroundColor: bgColor ?? Theme.of(context).colorScheme.primary
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30)
+      ),
+      backgroundColor: bgColor ?? Theme.of(context).colorScheme.primary,
     )
   );
 }

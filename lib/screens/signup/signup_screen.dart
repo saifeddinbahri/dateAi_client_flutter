@@ -1,3 +1,5 @@
+import 'package:date_ai/services/signup_service.dart';
+import 'package:date_ai/utils/input_validator.dart';
 import 'package:date_ai/utils/screen_padding.dart';
 import 'package:date_ai/utils/screen_size.dart';
 import 'package:date_ai/widgets/inputfield/cusotm_textfield.dart';
@@ -15,13 +17,58 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final _hidePassword = true;
+  final inputValidator = InputValidator();
+  final signupService = SignupService();
+  final _formKey = GlobalKey<FormState>();
+  bool _loading = false;
+  String? _error;
+  late Map<String, String> data ;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    data = {
+      'name': '',
+      'email':'',
+      'password':'',
+    };
+  }
+
+  void _register() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    String? error;
+
+    try {
+      var response = await signupService.execute(data);
+
+      if (!mounted) return;
+
+      if (response.success) {
+        Navigator.pop(context);
+      } else {
+        print(response.error);
+        error = 'Something went wrong, please try again.';
+      }
+    } catch(e) {
+      print(e);
+      error = 'Something went wrong, please try again.';
+    }
+    setState(() {
+      _loading = false;
+      _error = error;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenPadding = ScreenPadding(context);
     final screenSize = ScreenSize(context);
     final themeHelper = ThemeHelper(context);
-
+    
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.symmetric(
@@ -29,6 +76,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
         child: SingleChildScrollView(
           child: Form(
+            key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -57,26 +105,53 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
                 SizedBox(height: screenSize.height * 0.05,),
+                _showError(),
+                SizedBox(height: screenSize.height * 0.03),
                 CustomTextFiled(
+                  onSaved: (String? value){data['name'] = value ?? '';},
+                  validator: inputValidator.validateUsername,
+                  context: context,
+                  labelText: 'Username',
+                ),
+                SizedBox(height: screenSize.height * 0.03),
+                CustomTextFiled(
+                  onSaved: (String? value){data['email'] = value ?? '';},
+                  validator: inputValidator.validateEmail,
                   context: context,
                   labelText: 'Email',
                 ),
                 SizedBox(height: screenSize.height * 0.03),
                 CustomTextFiled(
+                  onSaved: (String? value){data['password'] = value ?? '';},
+                  validator: inputValidator.validatePassword,
                   context: context,
                   labelText: 'Password',
                   obscureText: _hidePassword,
                 ),
                 SizedBox(height: screenSize.height * 0.05),
                 PrimaryButton(
-                  onPressed: (){},
+                  onPressed: _loading ? null : (){
+                    FocusScope.of(context).unfocus();
+                    if (_formKey.currentState!.validate()) {
+                      _formKey.currentState!.save();
+                      _register();
+                    }
+                  },
                   context: context,
-                  child: Text(
-                    'Sign Up',
-                    style: themeHelper.textStyle.titleMedium!.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimary
-                    ),
-                  ),
+                  child: _loading
+                      ? SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                              color: themeHelper.colorScheme.onPrimary,
+                            ),
+                      )
+                      : Text(
+                          'Sign Up',
+                          style: themeHelper.textStyle.titleMedium!.copyWith(
+                              color: Theme.of(context).colorScheme.onPrimary
+                          ),
+                        ),
                 ),
               ],
             ),
@@ -84,5 +159,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
       ),
     );
+  }
+
+  Widget _showError() {
+    final theme = ThemeHelper(context);
+    if (_error != null) {
+      return Text(
+        _error!,
+        textAlign: TextAlign.center,
+        style: theme.textStyle.bodyMedium!.copyWith(
+          color: theme.colorScheme.error
+        ),
+      );
+    }
+    return const SizedBox();
   }
 }

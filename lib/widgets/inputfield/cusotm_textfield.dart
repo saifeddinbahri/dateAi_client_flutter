@@ -10,6 +10,7 @@ class CustomTextFiled extends TextFormField {
    super.obscureText,
    super.validator,
    required BuildContext context,
+   super.onSaved,
 }): super(
    decoration: InputDecoration(
      enabledBorder: OutlineInputBorder(
@@ -22,6 +23,16 @@ class CustomTextFiled extends TextFormField {
          color: Theme.of(context).colorScheme.outline,
          width: 2,
        ),
+     ),
+     errorBorder: OutlineInputBorder(
+         borderSide: BorderSide(
+             color: Theme.of(context).colorScheme.error
+         )
+     ),
+     focusedErrorBorder: OutlineInputBorder(
+         borderSide: BorderSide(
+             color: Theme.of(context).colorScheme.error
+         )
      ),
      labelText: labelText,
      labelStyle: Theme.of(context).textTheme.labelLarge!.copyWith(
