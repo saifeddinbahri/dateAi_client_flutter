@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:date_ai/utils/api/api_response.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -9,9 +11,9 @@ class LoginService {
   Future<ApiResponse> execute(Map<String,String> data) async {
     var response = await http.post(url, body: data)
         .timeout(const Duration(seconds: 5));
-    if (response.statusCode == 201) {
-      print(response.statusCode);
-      return ApiResponse(data: null);
+    if (response.statusCode == 200) {
+      print(response.body);
+      return ApiResponse(data: jsonDecode(response.body));
     }
     return ApiResponse(error: 'Failed to login');
   }

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../utils/theme_helper.dart';
 import '../../widgets/buttons/primary_button.dart';
+import '../../widgets/error_text.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -105,7 +106,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
                 SizedBox(height: screenSize.height * 0.05,),
-                _showError(),
+                showError(context, _error),
                 SizedBox(height: screenSize.height * 0.03),
                 CustomTextFiled(
                   onSaved: (String? value){data['name'] = value ?? '';},
@@ -161,17 +162,5 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  Widget _showError() {
-    final theme = ThemeHelper(context);
-    if (_error != null) {
-      return Text(
-        _error!,
-        textAlign: TextAlign.center,
-        style: theme.textStyle.bodyMedium!.copyWith(
-          color: theme.colorScheme.error
-        ),
-      );
-    }
-    return const SizedBox();
-  }
+
 }
