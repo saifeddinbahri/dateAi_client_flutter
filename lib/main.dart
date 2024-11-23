@@ -1,5 +1,6 @@
 import 'package:date_ai/auth_wrapper.dart';
 import 'package:date_ai/providers/drawer_provider.dart';
+import 'package:date_ai/screens/app_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:camera/camera.dart';
+import 'package:date_ai/screens/display_picture_screen/detect_anomaly_screen.dart';
 import 'package:date_ai/utils/screen_size.dart';
 import 'package:date_ai/utils/theme_helper.dart';
 import 'package:flutter/material.dart';
@@ -47,11 +48,11 @@ class _CameraScreenState extends State<CameraScreen> {
   void _takePicture() async {
     try {
       final image = await _cameraController.takePicture();
-      if (!context.mounted) return;
 
+      if (!mounted) return;
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => DisplayPictureScreen(
+          builder: (context) => DetectAnomalyScreen(
             imagePath: image.path,
           ),
         ),
@@ -64,7 +65,7 @@ class _CameraScreenState extends State<CameraScreen> {
   void _loadImageFromGallery() async {
     try  {
       XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-      if (!context.mounted) return;
+      if (!mounted) return;
       if (image != null) {
         await Navigator.of(context).push(
           MaterialPageRoute(
