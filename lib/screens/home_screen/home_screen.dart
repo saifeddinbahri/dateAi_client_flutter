@@ -1,9 +1,11 @@
 import 'package:date_ai/utils/fake_data.dart';
 import 'package:date_ai/utils/screen_size.dart';
 import 'package:date_ai/utils/theme_helper.dart';
-import 'package:date_ai/widgets/buttons/primary_button.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+
+import '../../providers/drawer_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,8 +19,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final drawerController = Provider.of<DrawerControllerProvider>(context, listen: false);
     final theme = ThemeHelper(context);
     final screenSize = ScreenSize(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -41,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             IconButton(
-                onPressed: null,
+                onPressed: drawerController.openDrawer,
                 icon: Icon(
                   Icons.menu,
                   size: screenSize.width * 0.085,

@@ -1,11 +1,11 @@
-import 'package:date_ai/screens/bottom_nav.dart';
+import 'package:date_ai/screens/app_shell.dart';
 import 'package:date_ai/services/login_service.dart';
 import 'package:date_ai/services/secure_storage_service.dart';
 import 'package:date_ai/utils/input_validator.dart';
 import 'package:date_ai/utils/screen_padding.dart';
 import 'package:date_ai/utils/screen_size.dart';
 import 'package:date_ai/widgets/error_text.dart';
-import 'package:date_ai/widgets/inputfield/cusotm_textfield.dart';
+import 'package:date_ai/widgets/inputfield/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import '../../utils/theme_helper.dart';
 import '../../widgets/buttons/primary_button.dart';
@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
-              builder: (context) => const BottomNav(),
+              builder: (context) => const AppShell(),
             ),
             ModalRoute.withName("/Home")
         );

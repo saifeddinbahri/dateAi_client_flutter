@@ -1,12 +1,18 @@
-import 'package:date_ai/screens/bottom_nav.dart';
-import 'package:date_ai/screens/home_screen/home_screen.dart';
-import 'package:date_ai/screens/landing_screen/landing_screen.dart';
-import 'package:date_ai/screens/login_screen/login_screen.dart';
+import 'package:date_ai/auth_wrapper.dart';
+import 'package:date_ai/providers/drawer_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => DrawerControllerProvider()),
+        ],
+        child: const MyApp(),
+      )
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -25,7 +31,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const LandingScreen(),
+      home: AuthWrapper(),
     );
   }
 }

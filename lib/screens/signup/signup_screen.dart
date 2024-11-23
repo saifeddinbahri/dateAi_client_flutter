@@ -2,7 +2,7 @@ import 'package:date_ai/services/signup_service.dart';
 import 'package:date_ai/utils/input_validator.dart';
 import 'package:date_ai/utils/screen_padding.dart';
 import 'package:date_ai/utils/screen_size.dart';
-import 'package:date_ai/widgets/inputfield/cusotm_textfield.dart';
+import 'package:date_ai/widgets/inputfield/custom_textfield.dart';
 import 'package:flutter/material.dart';
 
 import '../../utils/theme_helper.dart';
