@@ -90,17 +90,7 @@ class _DetectAnomalyScreenState extends State<DetectAnomalyScreen> {
                 ),
 
                 // Sliver for the content
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                      return ListTile(
-                        title: Text('Detail line ${index + 1}'),
-                      );
-                    },
-                    childCount: 30, // Number of lines in the content
-                  ),
-                ),
-                /*SliverToBoxAdapter(
+                SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: screenPadding.horizontal,
@@ -108,20 +98,19 @@ class _DetectAnomalyScreenState extends State<DetectAnomalyScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        SizedBox(height: screenSize.height * 0.02,),
                         Text(
-                          'Scanned on Oct 24, 2024',
+                          'Result',
                           textAlign: TextAlign.start,
-                          style: theme.textStyle.titleLarge,
+                          style: theme.textStyle.headlineMedium
                         ),
-                        Text(
-                          'Scanned on Oct 24, 2024',
-                          textAlign: TextAlign.start,
-                          style: theme.textStyle.titleLarge,
-                        ),
+                        SizedBox(height: screenSize.height * 0.015,),
+                        ..._detail(context, 'Status', 'Not healthy'),
+                        ..._detail(context, 'Anomaly detected', 'Black scrorc'),
                       ],
                     ),
                   ),
-                ),*/
+                ),
               ],
             ),
           ),
@@ -170,6 +159,26 @@ class _DetectAnomalyScreenState extends State<DetectAnomalyScreen> {
       ),
     );
   }
+}
+
+List<Widget> _detail(BuildContext context, String title, String body) {
+  final theme = ThemeHelper(context);
+  final screenSize = ScreenSize(context);
+
+  return [
+    Text(
+      title,
+      textAlign: TextAlign.start,
+      style: theme.textStyle.titleMedium,
+    ),
+    Text(
+      body,
+      textAlign: TextAlign.start,
+      style: theme.textStyle.bodyMedium,
+    ),
+    const Divider(),
+    SizedBox(height: screenSize.height * 0.015,)
+  ];
 }
 
 // Custom delegate to handle the image scrolling behavior

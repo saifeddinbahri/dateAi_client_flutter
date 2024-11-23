@@ -69,7 +69,7 @@ class _CameraScreenState extends State<CameraScreen> {
       if (image != null) {
         await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => DisplayPictureScreen(
+            builder: (context) => DetectAnomalyScreen(
               imagePath: image.path,
             ),
           ),
