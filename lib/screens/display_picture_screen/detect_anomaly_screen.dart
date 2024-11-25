@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:date_ai/services/scan_image_service.dart';
+import 'package:date_ai/utils/api/api_response.dart';
 import 'package:date_ai/utils/screen_padding.dart';
 import 'package:date_ai/utils/screen_size.dart';
 import 'package:date_ai/widgets/buttons/primary_button.dart';
@@ -20,7 +22,9 @@ class _DetectAnomalyScreenState extends State<DetectAnomalyScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _isButtonVisible = true;
   bool _isArrowWhite = false;
+  final _scanImageService = ScanImageService();
   bool _loading = false;
+  ApiResponse? _scanRes;
 
   @override
   void initState() {
@@ -43,21 +47,23 @@ class _DetectAnomalyScreenState extends State<DetectAnomalyScreen> {
     super.dispose();
   }
 
-  void _onDetectAnomalyPressed() {
+  void _onDetectAnomalyPressed() async{
     setState(() {
       _isButtonVisible = false;
+      _loading = true;
     });
+    final screenHeight = MediaQuery.of(context).size.height;
+    _scrollController.animateTo(
+      _scrollController.offset + screenHeight * 0.4,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
 
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (!mounted) return;
-      final screenHeight = MediaQuery.of(context).size.height;
-      _scrollController.animateTo(
-        _scrollController.offset + screenHeight * 0.4,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
+    var res = await _scanImageService.execute(widget.imagePath);
+    _loading = false;
+    _scanRes = res;
+    setState(() {
     });
-
   }
 
   @override
@@ -91,23 +97,35 @@ class _DetectAnomalyScreenState extends State<DetectAnomalyScreen> {
 
                 // Sliver for the content
                 SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: screenPadding.horizontal,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SizedBox(height: screenSize.height * 0.02,),
-                        Text(
-                          'Result',
-                          textAlign: TextAlign.start,
-                          style: theme.textStyle.headlineMedium
-                        ),
-                        SizedBox(height: screenSize.height * 0.015,),
-                        ..._detail(context, 'Status', 'Not healthy'),
-                        ..._detail(context, 'Anomaly detected', 'Black scrorc'),
-                      ],
+                  child: SizedBox(
+                    height: screenSize.height * 0.3,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenPadding.horizontal,
+                      ),
+                      child: _loading
+                          ? Center(
+                              child: CircularProgressIndicator(
+                                color: theme.colorScheme.primary,
+                              ),
+                            )
+                          : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SizedBox(height: screenSize.height * 0.02,),
+                          Text(
+                            _scanRes != null
+                                ? _scanRes!.data == null
+                                  ? _scanRes!.error
+                                  : _scanRes!.data['disease'] == null
+                                    ? 'Healthy'
+                                    : _scanRes!.data['disease']['name']
+                                : 'Something went wrong',
+                            textAlign: TextAlign.center,
+                            style: theme.textStyle.headlineMedium
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -117,7 +135,7 @@ class _DetectAnomalyScreenState extends State<DetectAnomalyScreen> {
 
           // Back arrow button at the top
           Positioned(
-            top: 40,
+            top: 30,
             left: 16,
             child: IconButton(
               style: IconButton.styleFrom(
@@ -138,14 +156,17 @@ class _DetectAnomalyScreenState extends State<DetectAnomalyScreen> {
           // "Detect Anomaly" button at the bottom
           if (_isButtonVisible)
             Positioned(
-              bottom: screenSize.height * 0.01,
-              left: screenPadding.horizontal,
-              right: screenPadding.horizontal,
+              bottom: 0,
+              left: 0,
+              right: 0,
               child: ElevatedButton(
                 onPressed: _onDetectAnomalyPressed,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.colorScheme.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding: EdgeInsets.symmetric(
+                    vertical: screenSize.height * 0.02,
+                  ),
+                  shape: const RoundedRectangleBorder(),
                 ),
                 child: Text(
                   'Detect Anomaly',
