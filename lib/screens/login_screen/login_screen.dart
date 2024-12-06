@@ -122,6 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   showError(context, _error),
                   SizedBox(height: screenSize.height * 0.03),
                   CustomTextFiled(
+                    key: const Key('loginScreenEmail'),
                     context: context,
                     validator: _inputValidator.validateEmail,
                     onSaved: (String? value){data['email'] = value ?? '';},
@@ -129,6 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   SizedBox(height: screenSize.height * 0.03),
                   CustomTextFiled(
+                    key: const Key('loginScreenPassword'),
                     context: context,
                     onSaved: (String? value){data['password'] = value ?? '';},
                     validator: _inputValidator.validatePassword,
@@ -152,6 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   SizedBox(height: screenSize.height * 0.02),
                   PrimaryButton(
+                    key: const Key('loginScreenSubmit'),
                     onPressed:  _loading ? null : ()
                         {
                           FocusScope.of(context).unfocus();

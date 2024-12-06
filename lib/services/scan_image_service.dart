@@ -7,7 +7,7 @@ import 'config.dart';
 
 class ScanImageService {
   final secureStorage = SecureStorageService();
-  final url = Uri.http(Config.uri, 'images/upload');
+  final url = Uri.http(Config.uri, 'scans/upload');
 
   Future<ApiResponse> execute(String imagePath) async {
     String? token = await secureStorage.readData('token');

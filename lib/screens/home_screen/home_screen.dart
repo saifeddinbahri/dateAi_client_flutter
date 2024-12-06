@@ -1,3 +1,4 @@
+import 'package:date_ai/services/stat_service.dart';
 import 'package:date_ai/utils/fake_data.dart';
 import 'package:date_ai/utils/screen_size.dart';
 import 'package:date_ai/utils/theme_helper.dart';
@@ -5,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../providers/drawer_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,162 +16,202 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _latestRes = FakeData.scanned;
+  final _statService = StatService();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _getStatData();
+  }
+  Future<Map<String, dynamic>>? _getStatData() async {
+    final Map<String, dynamic> _statData = {
+      'total': 0,
+      'infected': 0,
+    };
+    var res = await _statService.execute();
+    if (res.success) {
+      _statData['total'] = res.data['stats']['totalScans'];
+      _statData['infected'] = res.data['stats']['infectedScans'];
+    }
+    return _statData;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final drawerController = Provider.of<DrawerControllerProvider>(context, listen: false);
+    //final drawerController = Provider.of<DrawerControllerProvider>(context, listen: false);
     final theme = ThemeHelper(context);
     final screenSize = ScreenSize(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
+    return SingleChildScrollView(
+      child: FutureBuilder<Map<String, dynamic>>(
+        future: _getStatData(), // a previously-obtained Future<String> or null
+        builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
+          List<Widget> children;
+          if (snapshot.hasData) {
+            final data = snapshot.data;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Welcome',
-                  style: theme.textStyle.headlineMedium,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    numberStats(context, data!['total'],'Total scans', Icons.query_stats, '2.1%'),
+                    numberStats(context, data!['infected'],'Anomalies', Icons.report_problem, '0.7%'),
+                  ],
                 ),
-                SizedBox(width: screenSize.width*0.02,),
-                Text(
-                  'Eya',
-                  style: theme.textStyle.headlineMedium!.copyWith(
-                    fontWeight: FontWeight.w500,
+
+                SizedBox(height: screenSize.height * 0.01,),
+                Container(
+                  height: screenSize.height * 0.25,
+                  padding: EdgeInsets.symmetric(
+                      horizontal: screenSize.width * 0.05,
+                      vertical: screenSize.height * 0.02
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Top anomalies in Tunisia',
+                        style: theme.textStyle.titleMedium!.copyWith(
+                            fontWeight: FontWeight.w500
+                        ),
+                      ),
+                      SizedBox(height: screenSize.height * 0.03,),
+                      _topAnomaliesItem(1,30, 'Black Scorc', '48%', context),
+                      SizedBox(height: screenSize.height * 0.01,),
+                      const Divider(height: 2,),
+                      SizedBox(height: screenSize.height * 0.01,),
+                      _topAnomaliesItem(2,20, 'Black Scorc', '32%', context),
+                      SizedBox(height: screenSize.height * 0.01,),
+                      const Divider(height: 2,),
+                      SizedBox(height: screenSize.height * 0.01,),
+                      _topAnomaliesItem(3,16, 'Black Scorc', '20%', context),
+                    ],
+                  ),
+                ),
+                SizedBox(height: screenSize.height * 0.03,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Latest Scans',
+                      style: theme.textStyle.titleLarge!.copyWith(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 19,
+                      ),
+                    ),
+                    TextButton(
+                        onPressed: null,
+                        child: Text(
+                          'see all',
+                          style: theme.textStyle.titleMedium!.copyWith(
+                              color: Colors.black45
+                          ),
+                        )
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  width: screenSize.width * 0.5,
+                  height: screenSize.height * 0.27,
+                  child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _latestRes.length,
+                      itemBuilder: (context, index) {
+                        return _latestResultItem(
+                            _latestRes[index]['image']!,
+                            _latestRes[index]['date']!,
+                            _latestRes[index]['status']!
+                        );
+                      }
                   ),
                 ),
               ],
-            ),
-            IconButton(
-                onPressed: drawerController.openDrawer,
-                icon: Icon(
-                  Icons.menu,
-                  size: screenSize.width * 0.085,
-                ),
-            ),
-          ],
-
-        ),
-        Text(
-          "Start identifying date tree leaf diseases.",
-          style: theme.textStyle.titleMedium!.copyWith(
-            color: Colors.black45
-          ),
-        ),
-        SizedBox(height: screenSize.height * 0.03,),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            numberStats(74,'Total scans', context),
-            numberStats(66,'Anomaly detected', context),
-          ],
-        ),
-        SizedBox(height: screenSize.height * 0.01,),
-        Container(
-          height: screenSize.height * 0.25,
-          padding: EdgeInsets.symmetric(
-            horizontal: screenSize.width * 0.05,
-            vertical: screenSize.height * 0.02
-          ),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Top anomalies',
-                style: theme.textStyle.titleMedium!.copyWith(
-                  fontWeight: FontWeight.w500
-                ),
-              ),
-              SizedBox(height: screenSize.height * 0.03,),
-              _topAnomaliesItem(1,30, 'Black Scorc', '48%', context),
-              SizedBox(height: screenSize.height * 0.01,),
-              const Divider(height: 2,),
-              SizedBox(height: screenSize.height * 0.01,),
-              _topAnomaliesItem(2,20, 'Black Scorc', '32%', context),
-              SizedBox(height: screenSize.height * 0.01,),
-              const Divider(height: 2,),
-              SizedBox(height: screenSize.height * 0.01,),
-              _topAnomaliesItem(3,16, 'Black Scorc', '20%', context),
-            ],
-          ),
-        ),
-        SizedBox(height: screenSize.height * 0.03,),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Latest Scans',
-              style: theme.textStyle.titleLarge!.copyWith(
-                fontWeight: FontWeight.w500,
-                fontSize: 19,
-              ),
-            ),
-            TextButton(
-                onPressed: null,
-                child: Text(
-                  'see all',
-                  style: theme.textStyle.titleMedium!.copyWith(
-                      color: Colors.black45
-                  ),
-                )
-            ),
-          ],
-        ),
-        SizedBox(
-          width: screenSize.width * 0.5,
-          height: screenSize.height * 0.27,
-          child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: _latestRes.length,
-              itemBuilder: (context, index) {
-                return _latestResultItem(
-                _latestRes[index]['image']!,
-                _latestRes[index]['date']!,
-                _latestRes[index]['status']!
-                );
-              }
-          ),
-        ),
-      ],
+            );
+          }
+          return SizedBox(
+              height: screenSize.height * 0.8,
+              width: screenSize.width,
+              child: Center(child: CircularProgressIndicator(color: theme.colorScheme.primary,),)
+          );
+        },
+      ),
     );
   }
 
-  Widget numberStats(int count, String text, BuildContext context) {
+  Widget numberStats(BuildContext context, int count, String text,IconData icon, String nbStats) {
     final theme = ThemeHelper(context);
     final screenSize = ScreenSize(context);
+
     return Container(
-      height: screenSize.height * 0.12,
-      width: screenSize.width * 0.45,
+      height: screenSize.width * 0.445,
+      width: screenSize.width * 0.445,
       padding: EdgeInsets.symmetric(
-          horizontal: screenSize.width * 0.05,
-          vertical: screenSize.height * 0.02
+          horizontal: screenSize.width * 0.04,
+          vertical: screenSize.height * 0.02,
       ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Row(
+            children: [
+              Icon(icon, color: theme.colorScheme.secondary,),
+              SizedBox(width: screenSize.width * 0.05,),
+              Text(
+                text,
+                style: theme.textStyle.titleMedium!.copyWith(
+                    color: Colors.black45
+                ),
+                textAlign: TextAlign.start,
+              ),
+            ],
+          ),
+          SizedBox(height: screenSize.width * 0.08,),
           Text(
             '$count',
-            style: theme.textStyle.titleLarge!.copyWith(
-                fontWeight: FontWeight.w600
+            style: theme.textStyle.headlineLarge!.copyWith(
+                fontWeight: FontWeight.w500
             ),
-            textAlign: TextAlign.start,
+            textAlign: TextAlign.center,
           ),
-
-          Text(
-              text,
-              style: theme.textStyle.bodyLarge,
-              textAlign: TextAlign.start,
+          Expanded(
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.arrow_upward,
+                    color: Colors.greenAccent,
+                    size: theme.textStyle.bodyMedium!.fontSize,
+                  ),
+                  SizedBox(width: screenSize.width*0.015,),
+                  Text(
+                    nbStats,
+                    style: theme.textStyle.bodyMedium!.copyWith(
+                        color: Colors.greenAccent
+                    ),
+                    textAlign: TextAlign.start,
+                  ),
+                  SizedBox(width: screenSize.width*0.01,),
+                  Text(
+                    'vs last 7 days',
+                    style: theme.textStyle.bodyMedium!.copyWith(
+                        color: Colors.black45
+                    ),
+                    textAlign: TextAlign.start,
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

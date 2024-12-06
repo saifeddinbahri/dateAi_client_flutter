@@ -11,9 +11,7 @@ class LoginService {
   Future<ApiResponse> execute(Map<String,String> data) async {
     var response = await http.post(url, body: data)
         .timeout(const Duration(seconds: 5));
-    print(response.statusCode);
     if (response.statusCode == 200) {
-      print(response.body);
       return ApiResponse(data: jsonDecode(response.body));
     }
     return ApiResponse(error: 'Failed to login');
