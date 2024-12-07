@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:date_ai/services/scan_image_service.dart';
@@ -206,7 +207,7 @@ class _DetectAnomalyScreenState extends State<DetectAnomalyScreen> {
                 'Treatments',
                 style: theme.textStyle.titleMedium
             ),
-
+            SizedBox(height: screenSize.height * 0.03,),
             ..._treatmentCards(data['recommendations']),
           ],
         );
@@ -244,62 +245,70 @@ class _DetectAnomalyScreenState extends State<DetectAnomalyScreen> {
     if (data.isEmpty) return [];
     return data.map((e) {
       var treatmentInfo = e['diseaseTreatment'];
+      var details = jsonDecode(treatmentInfo['details']);
       return SizedBox(
-        height: screenSize.height * 0.4,
+        height: screenSize.height * 0.73,
         child: Card(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              ListTile(
-                title: Text(treatmentInfo['frequency'] == 'WEEKLY' ? 'Weekly' : 'Monthly'),
-                subtitle: Text(treatmentInfo['task']),
-              ),
-              Text(
-                'Details',
-                textAlign: TextAlign.start,
-                style: theme.textStyle.titleMedium,
-              ),
-              Text(
-                treatmentInfo['details'],
-                textAlign: TextAlign.start,
-                style: theme.textStyle.bodyMedium,
-              ),
-              SizedBox(height: screenSize.height * 0.03,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Duration',
-                    textAlign: TextAlign.start,
-                    style: theme.textStyle.titleSmall,
-                  ),
-                  Text(
-                    treatmentInfo['duration'],
-                    textAlign: TextAlign.start,
-                    style: theme.textStyle.titleSmall,
-                  ),
-                ],
-              ),
-              SizedBox(height: screenSize.height * 0.03,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  SizedBox(
-                    width: screenSize.width * 0.4,
-                    child: PrimaryButton(
-                        onPressed: (){},
-                        context: context,
-                        child: Text(
-                          'Start treatment',
-                          style: theme.textStyle.titleMedium!.copyWith(
-                              color: Theme.of(context).colorScheme.onPrimary
-                          ),
-                        )
+          margin: EdgeInsets.only(
+            bottom: screenSize.height * 0.02
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: screenSize.width * 0.04,
+              vertical: screenSize.width *0.04
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  treatmentInfo['frequency'] == 'WEEKLY' ? 'Weekly' : 'Monthly',
+                  style: theme.textStyle.titleLarge,
+                ),
+                ListTile(
+                  title: const Text('Task'),
+                  subtitle: Text(treatmentInfo['task']),
+                ),
+                ListTile(
+                  title: const Text('Duration'),
+                  subtitle: Text(treatmentInfo['duration']),
+                ),
+                ListTile(
+                  title: const Text('Product'),
+                  subtitle: Text(details['Product'] ?? 'No data'),
+                ),
+                ListTile(
+                  title: const Text('Dose'),
+                  subtitle: Text(details['Dosage'] ?? 'No data'),
+                ),
+                ListTile(
+                  title: const Text('Application method'),
+                  subtitle: Text(details['ApplicationMethod'] ?? 'No data'),
+                ),
+                ListTile(
+                  title: const Text('Outcome'),
+                  subtitle: Text(details['Outcome'] ?? 'No data'),
+                ),
+                SizedBox(height: screenSize.height * 0.02,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    SizedBox(
+                      width: screenSize.width * 0.4,
+                      child: PrimaryButton(
+                          onPressed: (){},
+                          context: context,
+                          child: Text(
+                            'Start treatment',
+                            style: theme.textStyle.titleMedium!.copyWith(
+                                color: Theme.of(context).colorScheme.onPrimary
+                            ),
+                          )
+                      ),
                     ),
-                  ),
-                ],
-              )
-            ],
+                  ],
+                )
+              ],
+            ),
           ),
         ),
       );
