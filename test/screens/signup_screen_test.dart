@@ -25,41 +25,41 @@ void main() {
   }
 
   testWidgets('Displays error message on failed signup', (WidgetTester tester) async {
-    // Arrange
+
     when(mockSignupService.execute(any)).thenAnswer((_) async => ApiResponse(error: 'Failed to register'));
 
     await buildSignUpScreen(tester);
 
-    // Enter user details
+
     await tester.enterText(find.byType(TextField).at(0), 'test');
     await tester.enterText(find.byType(TextField).at(1), 'test@test.com');
-    await tester.enterText(find.byType(TextField).at(2), 'password');
+    await tester.enterText(find.byType(TextField).at(2), 'pass1234654');
 
-    // Tap the Sign Up button
+
     await tester.tap(find.byType(ElevatedButton));
     await tester.pump();
 
-    // Verify
+
     expect(find.text('Something went wrong, please try again.'), findsOneWidget);
-    verify(mockSignupService.execute({'name': 'test', 'email': 'test@test.com', 'password': 'password'})).called(1);
+    verify(mockSignupService.execute({'name': 'test', 'email': 'test@test.com', 'password': 'pass1234654'})).called(1);
   });
 
   testWidgets('Navigates back on successful signup', (WidgetTester tester) async {
-    // Arrange
+
     when(mockSignupService.execute(any)).thenAnswer((_) async => ApiResponse(data: null));
 
     await buildSignUpScreen(tester);
 
-    // Enter user details
+
     await tester.enterText(find.byType(TextField).at(0), 'test');
     await tester.enterText(find.byType(TextField).at(1), 'test@test.com');
-    await tester.enterText(find.byType(TextField).at(2), 'password');
+    await tester.enterText(find.byType(TextField).at(2), 'pass12345');
 
-    // Tap the Sign Up button
+
     await tester.tap(find.byType(ElevatedButton));
     await tester.pumpAndSettle();
 
-    // Verify
-    verify(mockSignupService.execute({'name': 'test', 'email': 'test@test.com', 'password': 'password'})).called(1);
+
+    verify(mockSignupService.execute({'name': 'test', 'email': 'test@test.com', 'password': 'pass12345'})).called(1);
   });
 }

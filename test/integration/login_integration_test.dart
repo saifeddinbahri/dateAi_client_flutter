@@ -5,9 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
-
 import 'package:date_ai/services/login_service.dart';
-
 import '../screens/login_screen_test.mocks.dart';
 
 
@@ -31,47 +29,47 @@ void main() {
 
   group('Login Integration Test', () {
     testWidgets('displays success message on successful login', (tester) async {
-      // Arrange
+
       when(mockLoginService.execute(any)).thenAnswer((_) async => ApiResponse(
         data: {'accessToken': 'mock-token'},
       ));
 
       await tester.pumpWidget(createWidgetUnderTest());
 
-      // Act
+
       await tester.enterText(find.byKey(const Key('loginScreenEmail')), 'test@example.com');
       await tester.enterText(find.byKey(const Key('loginScreenPassword')), 'password123');
       await tester.tap(find.byKey(const Key('loginScreenSubmit')));
 
-      // Wait for animations and asynchronous actions
+
       await tester.pumpAndSettle();
 
-      // Assert
+
       expect(find.text('Login Successful'), findsOneWidget);
     });
 
     testWidgets('displays error message on login failure', (tester) async {
-      // Arrange
+
       when(mockLoginService.execute(any)).thenAnswer((_) async => ApiResponse(
         error: 'Invalid credentials',
       ));
 
       await tester.pumpWidget(createWidgetUnderTest());
 
-      // Act
+
       await tester.enterText(find.byKey(const Key('loginScreenEmail')), 'wrong@example.com');
       await tester.enterText(find.byKey(const Key('loginScreenPassword')), 'wrongpassword');
       await tester.tap(find.byKey(const Key('loginScreenSubmit')));
 
-      // Wait for animations and asynchronous actions
+
       await tester.pumpAndSettle();
 
-      // Assert
+
       expect(find.text('Invalid credentials'), findsOneWidget);
     });
 
     testWidgets('displays loading indicator while login is in progress', (tester) async {
-      // Arrange
+
       when(mockLoginService.execute(any)).thenAnswer(
             (_) async {
           await Future.delayed(const Duration(seconds: 2));
@@ -81,21 +79,21 @@ void main() {
 
       await tester.pumpWidget(createWidgetUnderTest());
 
-      // Act
+
       await tester.enterText(find.byKey(const Key('loginScreenEmail')), 'test@example.com');
       await tester.enterText(find.byKey(const Key('loginScreenPassword')), 'password123');
       await tester.tap(find.byKey(const Key('loginScreenSubmit')));
 
-      // Wait for the loading indicator to appear
+
       await tester.pump();
 
-      // Assert
+
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
-      // Wait for the async action to complete
+
       await tester.pumpAndSettle();
 
-      // Ensure loading indicator is gone after the action completes
+
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
   });

@@ -97,36 +97,17 @@ class _DetectAnomalyScreenState extends State<DetectAnomalyScreen> {
 
                 // Sliver for the content
                 SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: screenSize.height * 0.3,
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: screenPadding.horizontal,
-                      ),
-                      child: _loading
-                          ? Center(
-                              child: CircularProgressIndicator(
-                                color: theme.colorScheme.primary,
-                              ),
-                            )
-                          : Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SizedBox(height: screenSize.height * 0.02,),
-                          Text(
-                            _scanRes != null
-                                ? _scanRes!.data == null
-                                  ? _scanRes!.error
-                                  : _scanRes!.data['disease'] == null
-                                    ? 'Healthy'
-                                    : _scanRes!.data['disease']['name']
-                                : 'Something went wrong',
-                            textAlign: TextAlign.center,
-                            style: theme.textStyle.headlineMedium
-                          ),
-                        ],
-                      ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenPadding.horizontal,
                     ),
+                    child: _loading
+                        ? Center(
+                            child: CircularProgressIndicator(
+                              color: theme.colorScheme.primary,
+                            ),
+                          )
+                        : scanDetails(_scanRes)
                   ),
                 ),
               ],
@@ -180,7 +161,153 @@ class _DetectAnomalyScreenState extends State<DetectAnomalyScreen> {
       ),
     );
   }
+  Widget scanDetails(ApiResponse? response) {
+    final theme = ThemeHelper(context);
+    final screenSize = ScreenSize(context);
+    if (response == null) {
+      return SizedBox(
+        height: screenSize.height * 0.4,
+        child: Center(
+          child: Text(
+            'An error has occurred',
+            style: theme.textStyle.titleMedium,
+        ),
+        ),
+      );
+    }
+
+    if (response.success) {
+      var data = response.data['result'];
+      if (data['infected'] == true) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(height: screenSize.height * 0.02,),
+            Text(
+                'Infected',
+                style: theme.textStyle.titleLarge
+            ),
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Disease type: ',
+                    style: theme.textStyle.bodyMedium,
+                  ),
+                  TextSpan(
+                      text: data['diseaseType'],
+                      style: theme.textStyle.bodyMedium
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: screenSize.height * 0.03),
+            Text(
+                'Treatments',
+                style: theme.textStyle.titleMedium
+            ),
+
+            ..._treatmentCards(data['recommendations']),
+          ],
+        );
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: EdgeInsets.only(top: screenSize.height * 0.02),
+            child: SizedBox(
+              height: screenSize.height * 0.2,
+              child: Text(
+                  'Healthy',
+                  style: theme.textStyle.titleLarge
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    return SizedBox(
+      height: screenSize.height * 0.4,
+      child: Center(
+        child: Text(
+          'Scan failed',
+          style: theme.textStyle.titleMedium,
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _treatmentCards(List<dynamic> data) {
+    final theme = ThemeHelper(context);
+    final screenSize = ScreenSize(context);
+    if (data.isEmpty) return [];
+    return data.map((e) {
+      var treatmentInfo = e['diseaseTreatment'];
+      return SizedBox(
+        height: screenSize.height * 0.4,
+        child: Card(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ListTile(
+                title: Text(treatmentInfo['frequency'] == 'WEEKLY' ? 'Weekly' : 'Monthly'),
+                subtitle: Text(treatmentInfo['task']),
+              ),
+              Text(
+                'Details',
+                textAlign: TextAlign.start,
+                style: theme.textStyle.titleMedium,
+              ),
+              Text(
+                treatmentInfo['details'],
+                textAlign: TextAlign.start,
+                style: theme.textStyle.bodyMedium,
+              ),
+              SizedBox(height: screenSize.height * 0.03,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Duration',
+                    textAlign: TextAlign.start,
+                    style: theme.textStyle.titleSmall,
+                  ),
+                  Text(
+                    treatmentInfo['duration'],
+                    textAlign: TextAlign.start,
+                    style: theme.textStyle.titleSmall,
+                  ),
+                ],
+              ),
+              SizedBox(height: screenSize.height * 0.03,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  SizedBox(
+                    width: screenSize.width * 0.4,
+                    child: PrimaryButton(
+                        onPressed: (){},
+                        context: context,
+                        child: Text(
+                          'Start treatment',
+                          style: theme.textStyle.titleMedium!.copyWith(
+                              color: Theme.of(context).colorScheme.onPrimary
+                          ),
+                        )
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+        ),
+      );
+    }).toList();
+  }
+
 }
+
 
 List<Widget> _detail(BuildContext context, String title, String body) {
   final theme = ThemeHelper(context);
@@ -247,3 +374,5 @@ class _ImageHeaderDelegate extends SliverPersistentHeaderDelegate {
     return true;
   }
 }
+
+

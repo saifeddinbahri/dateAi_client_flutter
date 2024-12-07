@@ -1,24 +1,55 @@
+import 'package:date_ai/utils/theme_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:intl/intl.dart'; // Pour utiliser NumberFormat
+import 'package:intl/intl.dart';
+
+import '../../../services/stat_service.dart'; // Pour utiliser NumberFormat
 
 class RepartitionMaladies extends StatefulWidget {
-  const RepartitionMaladies({super.key});
-
+  const RepartitionMaladies({super.key, required this.diseaseData});
+  final Map<String, dynamic>? diseaseData;
   @override
   _RepartitionMaladiesState createState() => _RepartitionMaladiesState();
 }
 
 class _RepartitionMaladiesState extends State<RepartitionMaladies> {
   String selectedChips = 'mal3';
-  List<String> chips = [
-    'mal1',
-    'mal2',
-    'mal3',
-    'mal4',
-    'mal5',
-    'mal6',
-  ];
+  final _statService = StatService();
+
+
+
+
+  List<ChartColumnData>? setData() {
+    if(widget.diseaseData == null) {
+      return null;
+    }
+    List<dynamic> dList = widget.diseaseData!['diseaseDistribution'];
+    int colorIndex = 0;
+    List<ChartColumnData> data = [];
+    var dCount = widget.diseaseData!['infectedScans'];
+
+    if (dList.isEmpty) return null;
+    dList.forEach((e) {
+      data.add(
+          ChartColumnData(
+              e['diseaseType'],
+              0,
+              calculatePercentage(dCount, e['count']),
+              colors[colorIndex])
+      );
+      colorIndex = colorIndex + 1;
+    });
+    return data;
+  }
+
+  double calculatePercentage(int total, int count) {
+    if (total == 0) {
+      return 0;
+    }
+
+    double percentage = (count / total) * 100; // Calculate percentage
+    return double.parse(percentage.toStringAsFixed(2)) * 100;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,14 +123,14 @@ class _RepartitionMaladiesState extends State<RepartitionMaladies> {
               series: <CartesianSeries>[
                 RangeColumnSeries<ChartColumnData, String>(
                   borderRadius:
-                  BorderRadius.circular(10), // Réduire l'épaisseur
-                  dataSource: chartData,
-                  width: 0.4, // Réduire la largeur des colonnes
+                  BorderRadius.circular(10),
+                  dataSource: setData(),
+                  width: 0.4,
                   xValueMapper: (ChartColumnData data, _) => data.x,
                   highValueMapper: (ChartColumnData data, _) =>
-                  data.high! / 8000, // Convertir en pourcentage
+                  data.high! / 8000,
                   lowValueMapper: (ChartColumnData data, _) =>
-                  data.low! / 8000, // Convertir en pourcentage
+                  data.low! / 8000,
                   pointColorMapper: (ChartColumnData data, _) => data.color,
                 ),
               ],
@@ -109,41 +140,57 @@ class _RepartitionMaladiesState extends State<RepartitionMaladies> {
               'Year 2024',
               style: TextStyle(color: Colors.grey),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              child: FittedBox(
-                child: Wrap(
-                  spacing: 8,
-                  children: chips.map((category) {
-                    return ChoiceChip(
-                      label: Text(category),
-                      labelStyle: TextStyle(
-                        color: selectedChips == category
-                            ? Colors.white
-                            : Colors.black,
-                      ),
-                      selectedColor:
-                      const Color(0xFFD7761B), // Hex couleur corrigée
-                      backgroundColor: Colors.grey.shade200,
-                      showCheckmark: false,
-                      selected: selectedChips == category,
-                      side: const BorderSide(width: 0, color: Colors.white),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      onSelected: (isSelected) {
-                        setState(() {
-                          if (isSelected) {
-                            selectedChips = category;
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
+            chips(),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget chips() {
+    if(widget.diseaseData == null) return const SizedBox();
+    final theme = ThemeHelper(context);
+
+    List<dynamic> dList = widget.diseaseData!['diseaseDistribution'];
+
+    if (dList.isEmpty) return const SizedBox();
+    List<String> chips = [];
+    dList.forEach((e) {
+      chips.add(e['diseaseType']);
+    });
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+      child: FittedBox(
+        child: Wrap(
+          spacing: 8,
+          children: chips.map((category) {
+            return ChoiceChip(
+              label: Text(category),
+              labelStyle: TextStyle(
+                fontSize: theme.textStyle.labelLarge!.fontSize,
+                color: selectedChips == category
+                    ? Colors.white
+                    : Colors.black,
+              ),
+              selectedColor:
+              const Color(0xFFD7761B), // Hex couleur corrigée
+              backgroundColor: Colors.grey.shade200,
+              showCheckmark: false,
+              selected: selectedChips == category,
+              side: const BorderSide(width: 0, color: Colors.white),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              onSelected: (isSelected) {
+                setState(() {
+                  if (isSelected) {
+                    selectedChips = category;
+                  }
+                });
+              },
+            );
+          }).toList(),
         ),
       ),
     );
@@ -158,11 +205,12 @@ class ChartColumnData {
   final Color? color;
 }
 
-final List<ChartColumnData> chartData = <ChartColumnData>[
-  ChartColumnData("malad1", 2600, 5000, const Color(0xFF1A2902)),
-  ChartColumnData("malad2", 1800, 3000, const Color(0xFF344C11)),
-  ChartColumnData("malad3", 3200, 6000, const Color(0xFFAEC09A)),
-  ChartColumnData("malad4", 3800, 5000, const Color(0xFF797641)),
-  ChartColumnData("malad5", 2000, 4000, const Color(0xFF583E26)),
-  ChartColumnData("malad6", 3000, 7000, const Color(0xFFD9A037)),
+List<Color> colors = [
+  const Color(0xFF1A2902),
+  const Color(0xFF344C11),
+  const Color(0xFFAEC09A),
+  const Color(0xFF797641),
+  const Color(0xFF583E26),
+  const Color(0xFFD9A037),
 ];
+

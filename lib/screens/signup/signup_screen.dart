@@ -109,6 +109,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 showError(context, _error),
                 SizedBox(height: screenSize.height * 0.03),
                 CustomTextFiled(
+                  key: const Key('SignupScreenUsername'),
                   onSaved: (String? value){data['name'] = value ?? '';},
                   validator: inputValidator.validateUsername,
                   context: context,
@@ -116,6 +117,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 SizedBox(height: screenSize.height * 0.03),
                 CustomTextFiled(
+                  key: const Key('SignupScreenEmail'),
                   onSaved: (String? value){data['email'] = value ?? '';},
                   validator: inputValidator.validateEmail,
                   context: context,
@@ -123,6 +125,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 SizedBox(height: screenSize.height * 0.03),
                 CustomTextFiled(
+                  key: const Key('SignupScreenPassword'),
                   onSaved: (String? value){data['password'] = value ?? '';},
                   validator: inputValidator.validatePassword,
                   context: context,

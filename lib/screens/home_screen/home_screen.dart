@@ -22,8 +22,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _getStatData();
   }
+
   Future<Map<String, dynamic>>? _getStatData() async {
     final Map<String, dynamic> _statData = {
       'total': 0,
@@ -47,97 +47,103 @@ class _HomeScreenState extends State<HomeScreen> {
       child: FutureBuilder<Map<String, dynamic>>(
         future: _getStatData(), // a previously-obtained Future<String> or null
         builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
-          List<Widget> children;
-          if (snapshot.hasData) {
-            final data = snapshot.data;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    numberStats(context, data!['total'],'Total scans', Icons.query_stats, '2.1%'),
-                    numberStats(context, data!['infected'],'Anomalies', Icons.report_problem, '0.7%'),
-                  ],
-                ),
 
-                SizedBox(height: screenSize.height * 0.01,),
-                Container(
-                  height: screenSize.height * 0.25,
-                  padding: EdgeInsets.symmetric(
-                      horizontal: screenSize.width * 0.05,
-                      vertical: screenSize.height * 0.02
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+          if(snapshot.connectionState == ConnectionState.waiting) {
+            return SizedBox(
+                height: screenSize.height * 0.8,
+                width: screenSize.width,
+                child: Center(child: CircularProgressIndicator(color: theme.colorScheme.primary,),)
+            );
+          } else if (snapshot.hasData) {
+              final data = snapshot.data;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Top anomalies in Tunisia',
-                        style: theme.textStyle.titleMedium!.copyWith(
-                            fontWeight: FontWeight.w500
-                        ),
-                      ),
-                      SizedBox(height: screenSize.height * 0.03,),
-                      _topAnomaliesItem(1,30, 'Black Scorc', '48%', context),
-                      SizedBox(height: screenSize.height * 0.01,),
-                      const Divider(height: 2,),
-                      SizedBox(height: screenSize.height * 0.01,),
-                      _topAnomaliesItem(2,20, 'Black Scorc', '32%', context),
-                      SizedBox(height: screenSize.height * 0.01,),
-                      const Divider(height: 2,),
-                      SizedBox(height: screenSize.height * 0.01,),
-                      _topAnomaliesItem(3,16, 'Black Scorc', '20%', context),
+                      numberStats(context, data!['total'],'Total scans', Icons.query_stats, '2.1%'),
+                      numberStats(context, data!['infected'],'Anomalies', Icons.report_problem, '0.7%'),
                     ],
                   ),
-                ),
-                SizedBox(height: screenSize.height * 0.03,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Latest Scans',
-                      style: theme.textStyle.titleLarge!.copyWith(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 19,
-                      ),
+
+                  SizedBox(height: screenSize.height * 0.01,),
+                  Container(
+                    height: screenSize.height * 0.25,
+                    padding: EdgeInsets.symmetric(
+                        horizontal: screenSize.width * 0.05,
+                        vertical: screenSize.height * 0.02
                     ),
-                    TextButton(
-                        onPressed: null,
-                        child: Text(
-                          'see all',
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Top anomalies in Tunisia',
                           style: theme.textStyle.titleMedium!.copyWith(
-                              color: Colors.black45
+                              fontWeight: FontWeight.w500
                           ),
-                        )
+                        ),
+                        SizedBox(height: screenSize.height * 0.03,),
+                        _topAnomaliesItem(1,30, 'Black Scorc', '48%', context),
+                        SizedBox(height: screenSize.height * 0.01,),
+                        const Divider(height: 2,),
+                        SizedBox(height: screenSize.height * 0.01,),
+                        _topAnomaliesItem(2,20, 'Black Scorc', '32%', context),
+                        SizedBox(height: screenSize.height * 0.01,),
+                        const Divider(height: 2,),
+                        SizedBox(height: screenSize.height * 0.01,),
+                        _topAnomaliesItem(3,16, 'Black Scorc', '20%', context),
+                      ],
                     ),
-                  ],
-                ),
-                SizedBox(
-                  width: screenSize.width * 0.5,
-                  height: screenSize.height * 0.27,
-                  child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _latestRes.length,
-                      itemBuilder: (context, index) {
-                        return _latestResultItem(
-                            _latestRes[index]['image']!,
-                            _latestRes[index]['date']!,
-                            _latestRes[index]['status']!
-                        );
-                      }
                   ),
-                ),
-              ],
-            );
+                  SizedBox(height: screenSize.height * 0.03,),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Latest Scans',
+                        style: theme.textStyle.titleLarge!.copyWith(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 19,
+                        ),
+                      ),
+                      TextButton(
+                          onPressed: null,
+                          child: Text(
+                            'see all',
+                            style: theme.textStyle.titleMedium!.copyWith(
+                                color: Colors.black45
+                            ),
+                          )
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    width: screenSize.width * 0.5,
+                    height: screenSize.height * 0.27,
+                    child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _latestRes.length,
+                        itemBuilder: (context, index) {
+                          return _latestResultItem(
+                              _latestRes[index]['image']!,
+                              _latestRes[index]['date']!,
+                              _latestRes[index]['status']!
+                          );
+                        }
+                    ),
+                  ),
+                ],
+              );
           }
           return SizedBox(
               height: screenSize.height * 0.8,
               width: screenSize.width,
-              child: Center(child: CircularProgressIndicator(color: theme.colorScheme.primary,),)
+              child: Center(child: Text('No internet', style: theme.textStyle.titleMedium,),)
           );
         },
       ),
