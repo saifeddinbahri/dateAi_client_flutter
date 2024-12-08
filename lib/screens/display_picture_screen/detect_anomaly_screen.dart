@@ -2,11 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:date_ai/services/scan_image_service.dart';
+import 'package:date_ai/services/start_treatment_service.dart';
 import 'package:date_ai/utils/api/api_response.dart';
 import 'package:date_ai/utils/screen_padding.dart';
 import 'package:date_ai/utils/screen_size.dart';
 import 'package:date_ai/widgets/buttons/primary_button.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../utils/theme_helper.dart';
 
@@ -24,6 +26,7 @@ class _DetectAnomalyScreenState extends State<DetectAnomalyScreen> {
   bool _isButtonVisible = true;
   bool _isArrowWhite = false;
   final _scanImageService = ScanImageService();
+  final _startTreatmentService = StartTreatmentService();
   bool _loading = false;
   ApiResponse? _scanRes;
 
@@ -31,7 +34,6 @@ class _DetectAnomalyScreenState extends State<DetectAnomalyScreen> {
   void initState() {
     super.initState();
 
-    // Listen to scroll changes
     _scrollController.addListener(() {
       final isScrollingDown = _scrollController.offset > 1; // Adjust threshold
       if (isScrollingDown != _isArrowWhite) {
@@ -63,8 +65,27 @@ class _DetectAnomalyScreenState extends State<DetectAnomalyScreen> {
     var res = await _scanImageService.execute(widget.imagePath);
     _loading = false;
     _scanRes = res;
+    if (res.success) {
+      if (res.data != null && res.data['result']['infected'] == true) {
+        await _startTreatmentService.execute({
+          'scanId': res.data['result']['id'],
+          'startDate': '2024-12-07'
+        });
+      }
+    }
     setState(() {
     });
+  }
+
+  void _selectDate(BuildContext context) async {
+    DateFormat dateFormat = DateFormat("dd-MM-yyyy");
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        firstDate: DateTime(1901, 1),
+        lastDate: DateTime(2100));
+    if (picked == null) return;
+    var value = dateFormat.format(picked!);
+    print(value);
   }
 
   @override
@@ -209,6 +230,28 @@ class _DetectAnomalyScreenState extends State<DetectAnomalyScreen> {
             ),
             SizedBox(height: screenSize.height * 0.03,),
             ..._treatmentCards(data['recommendations']),
+           /* SizedBox(height: screenSize.height * 0.03,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: screenSize.width * 0.8,
+                  child: PrimaryButton(
+                      onPressed: () {
+                        _selectDate(context);
+                      },
+                      context: context,
+                      child: Text(
+                        'Start treatment',
+                        style: theme.textStyle.titleMedium!.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimary
+                        ),
+                      )
+                  ),
+                ),
+              ],
+            ),*/
+            SizedBox(height: screenSize.height * 0.02,),
           ],
         );
       }
@@ -246,69 +289,47 @@ class _DetectAnomalyScreenState extends State<DetectAnomalyScreen> {
     return data.map((e) {
       var treatmentInfo = e['diseaseTreatment'];
       var details = jsonDecode(treatmentInfo['details']);
-      return SizedBox(
-        height: screenSize.height * 0.73,
-        child: Card(
-          margin: EdgeInsets.only(
-            bottom: screenSize.height * 0.02
+      return Card(
+        margin: EdgeInsets.only(
+          bottom: screenSize.height * 0.02
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: screenSize.width * 0.04,
+            vertical: screenSize.width *0.04
           ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: screenSize.width * 0.04,
-              vertical: screenSize.width *0.04
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  treatmentInfo['frequency'] == 'WEEKLY' ? 'Weekly' : 'Monthly',
-                  style: theme.textStyle.titleLarge,
-                ),
-                ListTile(
-                  title: const Text('Task'),
-                  subtitle: Text(treatmentInfo['task']),
-                ),
-                ListTile(
-                  title: const Text('Duration'),
-                  subtitle: Text(treatmentInfo['duration']),
-                ),
-                ListTile(
-                  title: const Text('Product'),
-                  subtitle: Text(details['Product'] ?? 'No data'),
-                ),
-                ListTile(
-                  title: const Text('Dose'),
-                  subtitle: Text(details['Dosage'] ?? 'No data'),
-                ),
-                ListTile(
-                  title: const Text('Application method'),
-                  subtitle: Text(details['ApplicationMethod'] ?? 'No data'),
-                ),
-                ListTile(
-                  title: const Text('Outcome'),
-                  subtitle: Text(details['Outcome'] ?? 'No data'),
-                ),
-                SizedBox(height: screenSize.height * 0.02,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    SizedBox(
-                      width: screenSize.width * 0.4,
-                      child: PrimaryButton(
-                          onPressed: (){},
-                          context: context,
-                          child: Text(
-                            'Start treatment',
-                            style: theme.textStyle.titleMedium!.copyWith(
-                                color: Theme.of(context).colorScheme.onPrimary
-                            ),
-                          )
-                      ),
-                    ),
-                  ],
-                )
-              ],
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                treatmentInfo['frequency'] == 'WEEKLY' ? 'Weekly' : 'Monthly',
+                style: theme.textStyle.titleLarge,
+              ),
+              ListTile(
+                title: const Text('Task'),
+                subtitle: Text(treatmentInfo['task']),
+              ),
+              ListTile(
+                title: const Text('Duration'),
+                subtitle: Text(treatmentInfo['duration']),
+              ),
+              ListTile(
+                title: const Text('Product'),
+                subtitle: Text(details['Product'] ?? 'No data'),
+              ),
+              ListTile(
+                title: const Text('Dose'),
+                subtitle: Text(details['Dosage'] ?? 'No data'),
+              ),
+              ListTile(
+                title: const Text('Application method'),
+                subtitle: Text(details['ApplicationMethod'] ?? 'No data'),
+              ),
+              ListTile(
+                title: const Text('Outcome'),
+                subtitle: Text(details['Outcome'] ?? 'No data'),
+              ),
+            ],
           ),
         ),
       );
